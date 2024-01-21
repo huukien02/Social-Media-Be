@@ -7,7 +7,17 @@ import { diskStorage } from 'multer';
   imports: [
     MulterModule.register({
       storage: diskStorage({
-        destination: './avatars',
+        destination: (req: any, file: any, callback: any) => {
+          let folderPath = '';
+
+          if (file.fieldname === 'avatar') {
+            folderPath = './avatars';
+          } else if (file.fieldname === 'postImage') {
+            folderPath = './posts_images';
+          }
+
+          callback(null, folderPath);
+        },
         filename: (req: any, file: any, callback: any) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);

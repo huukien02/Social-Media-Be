@@ -33,6 +33,10 @@ import { Friendship } from './users/friendship.entity';
       rootPath: join(__dirname, '..', 'avatars'),
       serveRoot: '/avatars',
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'posts_images'),
+      serveRoot: '/posts_images',
+    }),
     MailerModule.forRoot({
       transport: {
         service: process.env.MAILER_SERVICE,

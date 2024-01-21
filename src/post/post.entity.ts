@@ -15,11 +15,14 @@ export class Post {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 255 })
-  title: string;
+  @Column({ nullable: true })
+  title: number | null;
 
   @Column('text')
   content: string;
+
+  @Column({ nullable: true })
+  image: string | null;
 
   @CreateDateColumn()
   created_at: Date;
@@ -29,9 +32,7 @@ export class Post {
 
   @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];
-  
 
   @OneToMany(() => Reaction, (reaction) => reaction.post)
   reactions: Reaction[];
-
 }

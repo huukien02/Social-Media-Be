@@ -220,7 +220,6 @@ export class UsersService {
           worker: true,
           delimiter: ',',
           step: function (row: any) {
-            console.log(row.data);
             if (row.data && row.data.length === 2) {
               const [property, value] = row.data.map((item: any) =>
                 item.trim(),

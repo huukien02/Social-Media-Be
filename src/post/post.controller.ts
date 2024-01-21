@@ -1,6 +1,16 @@
-import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { PostsService } from './post.service';
 import { ApiBody, ApiHeader, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 class payLoadCreatePostDto {
   @ApiProperty()
   title: string;
@@ -28,12 +38,19 @@ export class PostController {
     required: true,
   })
   @ApiBody({ type: payLoadCreatePostDto })
+  @UseInterceptors(FileInterceptor('image'))
   create(
     @Req() req: any,
-    @Body() body: { title: string; content: string; userId: any },
+    @UploadedFile() image: any,
+    @Body() body: { title: any; content: string },
   ): any {
     const dataCurrentUser = req.user;
-    return this.postService.create(body, dataCurrentUser);
+    const newsData = {
+      title: body.title,
+      content: body.content,
+      image: image,
+    };
+    return this.postService.create(newsData, dataCurrentUser);
   }
 
   @Get(':id')

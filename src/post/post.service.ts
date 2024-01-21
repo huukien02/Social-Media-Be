@@ -4,6 +4,8 @@ import { Post } from './post.entity';
 import { Any, Repository } from 'typeorm';
 import { User } from 'src/users/user.entity';
 import { Reaction } from './post.reaction.entity';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class PostsService {
@@ -30,6 +32,7 @@ export class PostsService {
         id: post.id,
         title: post.title,
         content: post.content,
+        image: post.image,
         time: post.created_at,
         user: {
           id: post.user.id,
@@ -61,8 +64,9 @@ export class PostsService {
 
   async create(payload: any, dataCurrentUser: any): Promise<any> {
     try {
+      let imageNew = null;
       const userId = dataCurrentUser?.user?.id;
-      const { title, content } = payload;
+      const { title, content, image } = payload;
 
       const user = await this.userRepository.findOne({
         where: { id: userId },
@@ -75,20 +79,22 @@ export class PostsService {
         };
       }
 
-      const checkTitle = await this.postRepository.findOne({
-        where: { title: title },
-      });
+      if (image) {
+        const uploadDir = path.join(__dirname, '../../', 'posts_images');
+        const baseUrl = 'http://localhost:3000/posts_images/';
+        const fileName = `${user.username}_${Date.now()}${path.extname(
+          image?.originalname,
+        )}`;
 
-      if (checkTitle) {
-        return {
-          status: HttpStatus.CONFLICT,
-          message: 'Title already exists',
-        };
+        const filePath = path.join(uploadDir, fileName);
+        fs.writeFileSync(filePath, image.buffer);
+        imageNew = `${baseUrl}${fileName}`;
       }
 
       const newPost = new Post();
       newPost.title = title;
       newPost.content = content;
+      newPost.image = imageNew;
       newPost.user = user;
 
       await this.postRepository.save(newPost);
