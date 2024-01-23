@@ -97,20 +97,13 @@ export class UsersController {
     required: true,
   })
   @ApiBody({ type: payLoadDto })
-  async sendEmail(@Body() payload: any, @Req() req: any) {
-    const currentUser = req.user;
-    const isSendMail = await this.usersService.sendEmail(payload, currentUser);
-    if (!isSendMail) {
-      return {
-        message: 'Send mail Failed',
-        status: HttpStatus.BAD_REQUEST,
-      };
-    } else {
-      return {
-        message: `Password change success, please to your gmail: ${currentUser?.user?.email} `,
-        status: HttpStatus.OK,
-      };
-    }
+  async sendEmail(@Body() payload: any) {
+    const result = await this.usersService.sendEmail(payload);
+
+    return {
+      message: result.message || 'Internal Server Error',
+      status: result.status || HttpStatus.INTERNAL_SERVER_ERROR,
+    };
   }
 
   @Post('create/from-csv')

@@ -24,6 +24,7 @@ export class UsersModule implements NestModule {
       .apply(AuthMiddleware)
       .exclude({ path: 'users/create', method: RequestMethod.ALL })
       .exclude({ path: 'users/create/from-csv', method: RequestMethod.ALL })
+      .exclude({ path: 'users/send-email', method: RequestMethod.ALL })
       .forRoutes('users');
   }
 }

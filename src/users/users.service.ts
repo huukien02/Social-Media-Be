@@ -188,25 +188,39 @@ export class UsersService {
     }
   }
 
-  async sendEmail(payload: any, currentUser: any) {
-    const { id } = payload;
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user || id != currentUser?.user?.id) {
-      return false;
+  async sendEmail(payload: any): Promise<any> {
+    try {
+      const { email } = payload;
+      const user = await this.userRepository.findOne({ where: { email } });
+
+      if (!user || !email) {
+        return {
+          message: 'Email not found',
+          status: HttpStatus.NOT_FOUND,
+        };
+      }
+
+      const newPassword = `${Math.floor(100000 + Math.random() * 900000)}`;
+      user.password = await bcrypt.hash(newPassword, 10);
+      await this.userRepository.save(user);
+
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Send mail by Kiennn 🚀 🚀 🚀 ',
+        text: 'HapoSoft',
+        html: ` Your new password is: ${newPassword}`,
+      });
+
+      return {
+        message: `Password change success, please check your email: ${email} `,
+        status: HttpStatus.OK,
+      };
+    } catch (error) {
+      return {
+        message: error.message || 'Internal Server Error',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
     }
-
-    const newPassword = `${Math.floor(100000 + Math.random() * 900000)}`;
-    user.password = await bcrypt.hash(newPassword, 10);
-    await this.userRepository.save(user);
-
-    await this.mailerService.sendMail({
-      to: user.email,
-      subject: 'Send mail by Kiennn 🚀 🚀 🚀 ',
-      text: 'HapoSoft',
-      html: ` Your new password is: ${newPassword}`,
-    });
-
-    return true;
   }
 
   async createFromCsv(file: any) {
