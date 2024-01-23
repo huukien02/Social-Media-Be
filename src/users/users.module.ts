@@ -18,13 +18,17 @@ import { Friendship } from './friendship.entity';
   controllers: [UsersController],
   providers: [UsersService, AuthService],
 })
+// export class UsersModule {}
 export class UsersModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthMiddleware)
-      .exclude({ path: 'users/create', method: RequestMethod.ALL })
-      .exclude({ path: 'users/create/from-csv', method: RequestMethod.ALL })
-      .exclude({ path: 'users/send-email', method: RequestMethod.ALL })
+      .exclude(
+        { path: 'users/create', method: RequestMethod.ALL },
+        { path: 'users/create/from-csv', method: RequestMethod.ALL },
+        { path: 'users/send-email', method: RequestMethod.ALL },
+      )
       .forRoutes('users');
   }
 }
+

@@ -121,7 +121,7 @@ export class PostsService {
     dataCurrentUser: any,
     postId: any,
     type: any,
-  ): Promise<Post> {
+  ): Promise<any> {
     const userId = dataCurrentUser?.user?.id;
     const post = await this.postRepository.findOne({
       where: { id: postId },
@@ -156,11 +156,11 @@ export class PostsService {
     }
 
     await this.reactionRepository.save(existingReaction);
-    return this.postRepository.save(post);
+    await this.postRepository.save(post);
   }
 }
 
-function calculateReactionsCount(reactions) {
+function calculateReactionsCount(reactions: any) {
   const reactionsCount = {};
 
   reactions.forEach((reaction) => {

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   Param,
   Post,
   Req,
@@ -63,12 +64,12 @@ export class PostController {
   }
 
   @Get('reaction/:postId/:type')
-  addReactionToPost(
+  async addReactionToPost(
     @Req() req: any,
     @Param('postId') postId: any,
     @Param('type') type: any,
   ) {
     const dataCurrentUser = req.user;
-    return this.postService.addReactionToPost(dataCurrentUser, postId, type);
+    await this.postService.addReactionToPost(dataCurrentUser, postId, type);
   }
 }
