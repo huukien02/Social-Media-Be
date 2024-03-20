@@ -2,7 +2,6 @@ import { Comment } from 'src/comment/comment.entity';
 import { Post } from 'src/post/post.entity';
 import { Reaction } from 'src/post/post.reaction.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Friendship } from './friendship.entity';
 
 @Entity()
 export class User {
@@ -29,10 +28,5 @@ export class User {
 
   @OneToMany(() => Reaction, (reaction) => reaction.user)
   reactions: Reaction[];
-
-  // friend
-  @OneToMany(() => Friendship, (friendship) => friendship.user)
-  friendships: Friendship[];
-  friends: any;
 
 }

@@ -36,3 +36,5 @@ lerna-debug.log*
 .env
 node_modules/
 avatars
+posts_images
+comment_images

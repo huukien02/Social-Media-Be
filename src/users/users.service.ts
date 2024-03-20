@@ -14,7 +14,6 @@ import { Readable } from 'stream';
 import * as papa from 'papaparse';
 import { Repository } from 'typeorm';
 import { Post } from 'src/post/post.entity';
-import { Friendship } from './friendship.entity';
 
 @Injectable()
 export class UsersService {
@@ -24,8 +23,6 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private mailerService: MailerService,
-    @InjectRepository(Friendship)
-    private friendshipRepository: Repository<Friendship>,
   ) {}
 
   async findAll(currentUser: any): Promise<any> {
@@ -49,20 +46,25 @@ export class UsersService {
 
       const user = await this.userRepository.findOne({
         where: { id },
-        relations: ['posts'],
+        relations: [
+          'posts',
+          'posts.user',
+          'posts.comments',
+          'posts.comments.user',
+          'posts.reactions',
+        ],
       });
 
-      const confirmFriends = await this.friendshipRepository.find({
-        where: { user: currentUser.user, confirmed: false },
-        relations: ['friend'],
+      let totalReactionsCount = 0;
+      user.posts.forEach((post: any) => {
+        post.reactionsCount = calculateReactionsCount(post.reactions);
+        Object.values(post.reactionsCount).forEach((count: number) => {
+          totalReactionsCount += count;
+        });
       });
+      (user as any).reactionsCount = totalReactionsCount;
 
-      const friends = await this.friendshipRepository.find({
-        where: { user: currentUser.user, confirmed: true },
-        relations: ['friend'],
-      });
-
-      return { user, confirm_friends: confirmFriends, friends };
+      return { user };
     } catch (error) {
       throw new Error('Find User Failed');
     }
@@ -70,7 +72,16 @@ export class UsersService {
 
   async create(user: any): Promise<any> {
     try {
-      const { username, password } = user;
+      const { username, password, email } = user;
+
+      const isEmail = await this.userRepository.findOne({ where: { email } });
+      if (isEmail) {
+        return {
+          status: HttpStatus.CONFLICT,
+          message: 'Email already exists',
+        };
+      }
+
       const isUser = await this.userRepository.findOne({ where: { username } });
       if (isUser) {
         return {
@@ -262,69 +273,13 @@ export class UsersService {
       console.error('Error processing CSV: ', error);
     }
   }
+}
+function calculateReactionsCount(reactions: any) {
+  const reactionsCount = {};
 
-  // Friend
-  async addFriend(payload: any, currentUser: any): Promise<any> {
-    const { id } = currentUser.user;
-    const { friendId } = payload;
+  reactions.forEach((reaction) => {
+    reactionsCount[reaction.type] = (reactionsCount[reaction.type] || 0) + 1;
+  });
 
-    const user = await this.userRepository.findOne({ where: { id: id } });
-    const friend = await this.userRepository.findOne({
-      where: { id: friendId },
-    });
-
-    if (id == friendId) {
-      throw new Error('Add friend error');
-    }
-
-    if (!user || !friend) {
-      throw new Error('User or friend not found');
-    }
-    const existingFriendship = await this.friendshipRepository.findOne({
-      where: [
-        { user, friend },
-        { user: friend, friend: user },
-      ],
-    });
-
-    if (existingFriendship) {
-      throw new Error('Friendship request already sent');
-    }
-
-    const newFriendship = this.friendshipRepository.create({
-      user,
-      friend,
-      confirmed: false,
-    });
-
-    await this.friendshipRepository.save(newFriendship);
-    return {
-      status: HttpStatus.OK,
-      message: 'Send add friend success',
-    };
-  }
-
-  async confirmAddFriend(payload: any, currentUser: any): Promise<any> {
-    try {
-      const { id } = currentUser.user;
-      const { idFriendConfirm } = payload;
-
-      const user = await this.userRepository.findOne({ where: { id: id } });
-
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      const friendship = await this.friendshipRepository.findOne({
-        where: { id: idFriendConfirm },
-      });
-
-      if (!friendship) {
-        throw new Error('Friendship request not found or already confirmed');
-      }
-
-      friendship.confirmed = true;
-      await this.friendshipRepository.save(friendship);
-    } catch (error) {}
-  }
+  return reactionsCount;
 }

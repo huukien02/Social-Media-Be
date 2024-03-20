@@ -15,7 +15,6 @@ import { Post } from './post/post.entity';
 import { Comment } from './comment/comment.entity';
 import { CommentModule } from './comment/comment.module';
 import { Reaction } from './post/post.reaction.entity';
-import { Friendship } from './users/friendship.entity';
 @Module({
   imports: [
     ConfigurationModule,
@@ -26,7 +25,7 @@ import { Friendship } from './users/friendship.entity';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [User, Post, Comment, Reaction, Friendship],
+      entities: [User, Post, Comment, Reaction],
       synchronize: true,
     }),
     ServeStaticModule.forRoot({

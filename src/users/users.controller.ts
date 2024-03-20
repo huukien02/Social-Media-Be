@@ -147,15 +147,4 @@ export class UsersController {
     }
   }
 
-  @Post('add-friend')
-  async addFriend(@Body() payload: any, @Req() req: any) {
-    const currentUser = req.user;
-    await this.usersService.addFriend(payload, currentUser);
-  }
-
-  @Post('confirm/add-friend')
-  async confirmAddFriend(@Body() payload: any, @Req() req: any) {
-    const currentUser = req.user;
-    await this.usersService.confirmAddFriend(payload, currentUser);
-  }
 }

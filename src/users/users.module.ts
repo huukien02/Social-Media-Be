@@ -11,10 +11,9 @@ import { User } from './user.entity';
 import { AuthMiddleware } from 'src/middleware/auth.middleware';
 import { AuthService } from 'src/auth/auth.service';
 import { Post } from 'src/post/post.entity';
-import { Friendship } from './friendship.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Post, Friendship])],
+  imports: [TypeOrmModule.forFeature([User, Post])],
   controllers: [UsersController],
   providers: [UsersService, AuthService],
 })

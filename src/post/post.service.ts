@@ -33,7 +33,7 @@ export class PostsService {
         title: post.title,
         content: post.content,
         image: post.image,
-        time: post.created_at,
+        created_at: post.created_at,
         user: {
           id: post.user.id,
           username: post.user.username,
@@ -42,7 +42,7 @@ export class PostsService {
         comments: post.comments.map((comment) => ({
           id: comment.id,
           content: comment.content,
-          time: comment.created_at,
+          created_at: comment.created_at,
           user: {
             id: comment.user.id,
             username: comment.user.username,
